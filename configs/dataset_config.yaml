@@ -1,0 +1,65 @@
+# Dataset Configuration for S-GraphLLM
+
+# Available datasets
+datasets:
+  ogbn-mag:
+    name: "OGB-MAG (Open Graph Benchmark - Heterogeneous Academic Graph)"
+    url: "https://ogb.stanford.edu/docs/nodeprop/#ogbn-mag"
+    num_nodes: 1000000  # Approximate
+    num_edges: 10000000  # Approximate
+    node_types: ["paper", "author", "institution", "field"]
+    edge_types: ["writes", "affiliated_with", "has_topic"]
+    description: "Heterogeneous academic graph with papers, authors, institutions, and fields"
+  
+  wikidata:
+    name: "Wikidata Knowledge Graph"
+    url: "https://www.wikidata.org/"
+    num_nodes: 100000000  # Approximate
+    num_edges: 1000000000  # Approximate
+    description: "Large-scale knowledge graph with diverse entities and relationships"
+  
+  hotpotqa:
+    name: "HotpotQA Dataset"
+    url: "https://hotpotqa.github.io/"
+    num_questions: 113000
+    num_supporting_facts: 2  # Average
+    description: "Multi-hop question answering dataset requiring reasoning over multiple documents"
+  
+  webqsp:
+    name: "WebQSP Dataset"
+    url: "https://www.microsoft.com/en-us/download/details.aspx?id=52763"
+    num_questions: 4737
+    description: "Web question answering dataset with SPARQL annotations"
+
+# Benchmark configuration
+benchmarks:
+  graph_reasoning_tasks:
+    - name: "Shortest Path"
+      description: "Find shortest path between two nodes"
+      metric: "accuracy"
+    
+    - name: "Subgraph Matching"
+      description: "Match query pattern in graph"
+      metric: "F1-score"
+    
+    - name: "Multi-hop Reasoning"
+      description: "Answer questions requiring multiple hops"
+      metric: "accuracy"
+    
+    - name: "Entity Linking"
+      description: "Link entities to graph nodes"
+      metric: "accuracy"
+
+# Evaluation configuration
+evaluation:
+  metrics:
+    - "accuracy"
+    - "F1-score"
+    - "precision"
+    - "recall"
+    - "latency"
+    - "memory_usage"
+  
+  test_split: 0.2
+  validation_split: 0.1
+  random_seed: 42

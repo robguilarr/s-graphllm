@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s-graphllm"
+version = "0.1.0"
+description = "Scalable Graph-Augmented Language Model for large-scale graph reasoning"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "S-GraphLLM Team", email = "team@s-graphllm.dev"}
+]
+keywords = ["graph", "llm", "reasoning", "knowledge-graph", "hierarchical"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "torch-geometric>=2.3.0",
+    "networkx>=3.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "pyyaml>=6.0",
+    "langchain>=0.1.0",
+    "langgraph>=0.0.1",
+    "openai>=1.0.0",
+    "faiss-cpu>=1.7.4",
+    "pydantic>=2.0.0",
+    "tqdm>=4.65.0",
+    "scikit-learn>=1.3.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.4.0",
+    "pre-commit>=3.3.0",
+]
+distributed = [
+    "dask>=2023.9.0",
+    "dask-distributed>=2023.9.0",
+    "ray>=2.7.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/s-graphllm/s-graphllm"
+Documentation = "https://s-graphllm.readthedocs.io"
+Repository = "https://github.com/s-graphllm/s-graphllm.git"
+"Bug Tracker" = "https://github.com/s-graphllm/s-graphllm/issues"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

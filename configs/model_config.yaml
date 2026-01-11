@@ -1,0 +1,35 @@
+# S-GraphLLM Model Configuration
+
+# Model configuration
+model_name: "gpt-4.1-mini"
+embedding_dim: 768
+hidden_dim: 1024
+num_layers: 3
+num_heads: 8
+dropout: 0.1
+
+# Graph configuration
+max_nodes_per_partition: 10000
+max_edges_per_partition: 50000
+num_partitions: null  # Auto-compute based on graph size
+
+# Reasoning configuration
+max_hops: 3
+context_window: 4096
+temperature: 0.7
+top_k: 50
+
+# Attention configuration
+graph_aware_attention_beta: 0.5
+similarity_metric: "shortest_path"  # or "common_neighbors"
+
+# Training configuration
+batch_size: 32
+learning_rate: 0.0001
+num_epochs: 10
+warmup_steps: 1000
+
+# Data configuration
+dataset_name: "ogbn-mag"
+data_dir: "./data"
+cache_dir: "./cache"
