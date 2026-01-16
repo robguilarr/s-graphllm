@@ -35,10 +35,8 @@ Input: Large Knowledge Graph + Query
 Based on Section 3.3 of the GraphLLM paper, implements:
 
 - **RRWP Encoding** (Equation 6):
-  ```
-  R_i,j = [I_i,j, M_i,j, M²_i,j, ..., M^(C-1)_i,j]
-  ```
-  where M = D⁻¹A is the random walk matrix
+  $$R_{i,j} = [I_{i,j}, M_{i,j}, M^2_{i,j}, \ldots, M^{C-1}_{i,j}]$$
+  where $M = D^{-1}A$ is the random walk matrix
 
 - **Sparse Graph Attention**: Custom attention mechanism with edge features
 - **Multi-head Architecture**: 8 attention heads by default
@@ -65,14 +63,10 @@ node_repr = graph_transformer(node_features, edge_index, adj_matrix)
 Based on Section 3.2 of the GraphLLM paper, implements:
 
 - **Encoder** (Equation 5a):
-  ```
-  c_i = TransformerEncoder(d_i, W_D)
-  ```
+  $$c_i = \text{TransformerEncoder}(d_i, W_D)$$
 
 - **Decoder** (Equation 5b):
-  ```
-  H_i = TransformerDecoder(Q, c_i)
-  ```
+  $$H_i = \text{TransformerDecoder}(Q, c_i)$$
 
 **Usage**:
 ```python
@@ -105,9 +99,7 @@ Our scalability enhancement that enables billion-node graph processing:
 
 Our custom attention mechanism for API-based LLM integration:
 
-```
-α'_ij = exp(q_i^T k_j / √d_k + β·S(n_i, n_j)) / Σ_l exp(...)
-```
+$$\alpha'_{ij} = \frac{\exp\left(\frac{q_i^T k_j}{\sqrt{d_k}} + \beta \cdot S(n_i, n_j)\right)}{\sum_l \exp\left(\frac{q_i^T k_l}{\sqrt{d_k}} + \beta \cdot S(n_i, n_l)\right)}$$
 
 ## Installation
 
