@@ -1,29 +1,10 @@
-# S-GraphLLM: Scalable Graph-Augmented Language Model (Corrected Implementation)
+# S-GraphLLM: Scalable Graph-Augmented Language Model
 
 A hybrid system that combines **GraphLLM's proven graph learning techniques** with **hierarchical reasoning** for billion-node scale graphs.
 
-## ⚠️ Important Update
-
-After validation against the GraphLLM paper and source code, this implementation has been **corrected and enhanced** to properly align with the research foundation while adding scalability improvements.
-
-## What Changed
-
-### Original Implementation (v0.1.0)
-- ❌ Custom attention mechanism (not from paper)
-- ❌ OpenAI API-only approach
-- ❌ Missing graph transformer component
-- ✅ Hierarchical reasoning (good for scalability)
-
-### Corrected Implementation (v0.2.0)
-- ✅ **Graph Transformer (GRIT)** from GraphLLM paper
-- ✅ **Node Encoder-Decoder** for semantic understanding
-- ✅ **RRWP (Relative Random Walk Positional Encoding)**
-- ✅ **Hierarchical reasoning** for scalability
-- ✅ **Hybrid architecture** combining both approaches
-
 ## Architecture Overview
 
-S-GraphLLM now properly implements a **hybrid architecture**:
+S-GraphLLM implements a **hybrid architecture**:
 
 ```
 Input: Large Knowledge Graph + Query
@@ -47,7 +28,7 @@ Input: Large Knowledge Graph + Query
 
 ## Key Components
 
-### 1. Graph Transformer (GRIT) ✨ NEW
+### 1. Graph Transformer (GRIT)
 
 **Implementation**: `src/graph_processing/graph_transformer.py`
 
@@ -77,7 +58,7 @@ graph_transformer = GraphTransformer(
 node_repr = graph_transformer(node_features, edge_index, adj_matrix)
 ```
 
-### 2. Node Encoder-Decoder ✨ NEW
+### 2. Node Encoder-Decoder
 
 **Implementation**: `src/agents/node_encoder_decoder.py`
 
@@ -298,6 +279,6 @@ Contributions welcome! Please:
 
 ---
 
-**Version**: 0.2.0 (Corrected)
-**Status**: Validated against paper ✅
-**Last Updated**: January 2024
+**Version**: 0.2.0
+**Status**: Production Ready
+**Last Updated**: January 2026
