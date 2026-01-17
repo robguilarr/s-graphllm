@@ -225,6 +225,9 @@ pytest tests/test_reasoning.py -v
 ## Documentation
 
 - **README.md** (this file): Overview and usage
+- **[docs/](docs/)**: Theoretical foundations and algorithm explanations
+  - **[Graph Partitioning Theory](docs/graph_partitioning_theory.md)**: METIS algorithm, spectral methods, and scalability
+  - **[Hierarchical Reasoning Theory](docs/hierarchical_reasoning_theory.md)**: Coarse-to-fine reasoning and divide-and-conquer
 - **VALIDATION_ANALYSIS.md**: Detailed validation against paper
 - **PROJECT_SUMMARY.md**: Implementation summary
 - **Paper**: [GraphLLM: Boosting Graph Reasoning Ability of Large Language Model](https://arxiv.org/abs/2310.05845)
