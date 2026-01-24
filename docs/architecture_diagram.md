@@ -16,174 +16,150 @@ The original reference diagram had the following issues that have been corrected
 
 ## Complete Architecture Diagram
 
+### Main Flow
+
 ```mermaid
 flowchart TD
-    %% ═══════════════════════════════════════════════════════════════════
-    %% LAYER 1: INPUT LAYER
-    %% ═══════════════════════════════════════════════════════════════════
-    subgraph InputLayer ["📥 Layer 1: Input Layer"]
-        direction LR
-        KG([("Knowledge Graph G=(V,E,X)")])
-        Query([("Natural Language Query Q")])
+    Start(["Input: Knowledge Graph + Query"]) --> ScalLayer["Layer 2: Scalability Layer"]
+    ScalLayer --> NeuralLayer["Layer 3: Neural Components"]
+    ScalLayer --> ReasonLayer["Layer 4: Reasoning Layer"]
+    NeuralLayer --> ReasonLayer
+    ReasonLayer --> Output(["Output: Final Answer"])
+    
+    style Start fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style ScalLayer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style NeuralLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style ReasonLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Output fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+```
+
+### Layer 2: Scalability Layer
+
+```mermaid
+flowchart LR
+    Input["Knowledge Graph G"] --> GP["Graph Partitioner"]
+    GP --> GC["Graph Coarsener"]
+    
+    GP -.-> PS1["METIS-like"]
+    GP -.-> PS2["Louvain"]
+    GP -.-> PS3["Balanced"]
+    
+    GC --> Out1["Partitions P1...Pk"]
+    GC --> Out2["Coarse Graph"]
+    
+    style Input fill:#e3f2fd,stroke:#1565c0
+    style GP fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style GC fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style PS1 fill:#f5f5f5,stroke:#757575,stroke-dasharray: 5 5
+    style PS2 fill:#f5f5f5,stroke:#757575,stroke-dasharray: 5 5
+    style PS3 fill:#f5f5f5,stroke:#757575,stroke-dasharray: 5 5
+```
+
+### Layer 3: GraphLLM Neural Components
+
+```mermaid
+flowchart TB
+    subgraph NodeComp["Node Understanding"]
+        NE["Node Encoder"] --> ND["Node Decoder"]
     end
-
-    %% ═══════════════════════════════════════════════════════════════════
-    %% LAYER 2: SCALABILITY LAYER
-    %% ═══════════════════════════════════════════════════════════════════
-    subgraph ScalabilityLayer ["⚡ Layer 2: Scalability Layer"]
-        direction TB
-        
-        GP["Graph Partitioner<br/>━━━━━━━━━━━━━━━<br/>Divides G into k partitions"]
-        GC["Graph Coarsener<br/>━━━━━━━━━━━━━━━<br/>Creates summarized graph"]
-        
-        GP -->|"Partitions P₁...Pₖ"| GC
-        
-        subgraph PartitionStrategies ["Partitioning Strategies"]
-            direction LR
-            PS1["METIS-like<br/>Spectral Clustering"]
-            PS2["Community Detection<br/>Louvain Algorithm"]
-            PS3["Balanced<br/>Node Ordering"]
-        end
-        
-        GP -.->|"Strategy Selection"| PS1
-        GP -.->|"Strategy Selection"| PS2
-        GP -.->|"Strategy Selection"| PS3
+    
+    subgraph StructComp["Structure Understanding"]
+        RRWP["RRWP Encoding"] --> GRIT["Graph Transformer"]
     end
-
-    %% ═══════════════════════════════════════════════════════════════════
-    %% LAYER 3: GRAPHLLM NEURAL COMPONENTS
-    %% ═══════════════════════════════════════════════════════════════════
-    subgraph NeuralLayer ["🧠 Layer 3: GraphLLM Neural Components"]
-        direction TB
-        
-        subgraph NodeUnderstanding ["Node Understanding (Section 3.2)"]
-            direction LR
-            NE["Node Encoder<br/>━━━━━━━━━━━━━━━<br/>TransformerEncoder(dᵢ, W_D)"]
-            ND["Node Decoder<br/>━━━━━━━━━━━━━━━<br/>TransformerDecoder(Q, cᵢ)"]
-            NE -->|"Context Vectors cᵢ"| ND
-        end
-        
-        subgraph StructUnderstanding ["Structure Understanding (Section 3.3)"]
-            direction LR
-            RRWP["RRWP Encoding<br/>━━━━━━━━━━━━━━━<br/>R = [I, M, M², ..., Mᶜ⁻¹]"]
-            GRIT["Graph Transformer<br/>━━━━━━━━━━━━━━━<br/>Multi-head Sparse Attention"]
-            RRWP -->|"Positional Encoding"| GRIT
-        end
-        
-        subgraph AttnModulation ["Attention Modulation (Novel)"]
-            direction LR
-            SIM["Similarity Metric<br/>━━━━━━━━━━━━━━━<br/>Shortest Path / Jaccard"]
-            GAA["Graph-Aware Attention<br/>━━━━━━━━━━━━━━━<br/>α' = softmax(QKᵀ/√d + β·S)"]
-            SIM -->|"Similarity Matrix S"| GAA
-        end
+    
+    subgraph AttnComp["Attention Modulation"]
+        SIM["Similarity Metric"] --> GAA["Graph-Aware Attention"]
     end
+    
+    Input1["Node Text"] --> NE
+    Input2["Graph Structure"] --> RRWP
+    
+    ND --> Output1["Node Embeddings"]
+    GRIT --> Output2["Structural Embeddings"]
+    GAA --> Output3["Attention Weights"]
+    
+    style NodeComp fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style StructComp fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style AttnComp fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
 
-    %% ═══════════════════════════════════════════════════════════════════
-    %% LAYER 4: HIERARCHICAL REASONING LAYER
-    %% ═══════════════════════════════════════════════════════════════════
-    subgraph ReasoningLayer ["🔄 Layer 4: Hierarchical Reasoning Layer"]
-        direction TB
-        
-        Orchestrator["Hierarchical Reasoning Orchestrator<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Coordinates 3-stage reasoning process"]
-        
-        subgraph Stage1 ["Stage 1: Coarse-Grained Reasoning"]
-            direction TB
-            S1_Context["Generate Coarse Context<br/>━━━━━━━━━━━━━━━<br/>Textual summary of G_coarse"]
-            S1_Keywords["Extract Query Keywords<br/>━━━━━━━━━━━━━━━<br/>Entity & concept extraction"]
-            S1_Filter["Filter Partitions<br/>━━━━━━━━━━━━━━━<br/>Keyword matching + relevance"]
-            S1_LLM["LLM: Partition Ranking<br/>━━━━━━━━━━━━━━━<br/>Select top-k partitions"]
-            
-            S1_Context --> S1_Keywords
-            S1_Keywords --> S1_Filter
-            S1_Filter -->|"Candidate Partitions"| S1_LLM
-        end
-        
-        subgraph Stage2 ["Stage 2: Fine-Grained Reasoning"]
-            direction TB
-            S2_Extract["Extract Subgraphs<br/>━━━━━━━━━━━━━━━<br/>Full subgraph for each Pᵢ"]
-            S2_Neural["Apply Neural Encoding<br/>━━━━━━━━━━━━━━━<br/>Node + Structure embeddings"]
-            S2_Format["Format Detailed Context<br/>━━━━━━━━━━━━━━━<br/>Entity-relationship text"]
-            S2_LLM["LLM: Multi-hop Reasoning<br/>━━━━━━━━━━━━━━━<br/>Chain-of-thought over graph"]
-            
-            S2_Extract --> S2_Neural
-            S2_Neural --> S2_Format
-            S2_Format -->|"Rich Graph Context"| S2_LLM
-        end
-        
-        subgraph Stage3 ["Stage 3: Answer Synthesis"]
-            direction TB
-            S3_Aggregate["Aggregate Evidence<br/>━━━━━━━━━━━━━━━<br/>Combine from all partitions"]
-            S3_Resolve["Conflict Resolution<br/>━━━━━━━━━━━━━━━<br/>Majority vote / confidence"]
-            S3_LLM["LLM: Final Synthesis<br/>━━━━━━━━━━━━━━━<br/>Generate coherent answer"]
-            
-            S3_Aggregate --> S3_Resolve
-            S3_Resolve -->|"Resolved Evidence"| S3_LLM
-        end
-        
-        %% LLM Agent (shared)
-        LLMAgent["LLM Agent<br/>━━━━━━━━━━━━━━━<br/>GPT-4.1-mini / Gemini"]
-        
-        Orchestrator --> Stage1
-        S1_LLM -->|"Selected Partition IDs"| Stage2
-        S2_LLM -->|"Reasoning Results"| Stage3
+### Layer 4: Hierarchical Reasoning
+
+```mermaid
+flowchart TD
+    Orch["Hierarchical Orchestrator"] --> Stage1
+    
+    subgraph Stage1["Stage 1: Coarse-Grained"]
+        S1A["Generate Coarse Context"] --> S1B["Extract Keywords"]
+        S1B --> S1C["Filter Partitions"]
+        S1C --> S1D["LLM: Rank Partitions"]
     end
-
-    %% ═══════════════════════════════════════════════════════════════════
-    %% LAYER 5: OUTPUT LAYER
-    %% ═══════════════════════════════════════════════════════════════════
-    subgraph OutputLayer ["📤 Layer 5: Output Layer"]
-        direction LR
-        Result([("Final Answer<br/>+ Evidence<br/>+ Confidence<br/>+ Reasoning Trace")])
+    
+    Stage1 --> Stage2
+    
+    subgraph Stage2["Stage 2: Fine-Grained"]
+        S2A["Extract Subgraphs"] --> S2B["Apply Neural Encoding"]
+        S2B --> S2C["Format Context"]
+        S2C --> S2D["LLM: Multi-hop Reasoning"]
     end
+    
+    Stage2 --> Stage3
+    
+    subgraph Stage3["Stage 3: Synthesis"]
+        S3A["Aggregate Evidence"] --> S3B["Resolve Conflicts"]
+        S3B --> S3C["LLM: Final Answer"]
+    end
+    
+    LLM["LLM Agent"] -.-> S1D
+    LLM -.-> S2D
+    LLM -.-> S3C
+    
+    style Orch fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
+    style Stage1 fill:#fff9e6,stroke:#ffa726
+    style Stage2 fill:#fff9e6,stroke:#ffa726
+    style Stage3 fill:#fff9e6,stroke:#ffa726
+    style LLM fill:#e0f7fa,stroke:#00838f,stroke-width:2px
+```
 
-    %% ═══════════════════════════════════════════════════════════════════
-    %% INTER-LAYER CONNECTIONS
-    %% ═══════════════════════════════════════════════════════════════════
-    
-    %% Input to Scalability
-    KG -->|"Graph G = (V, E, X)"| GP
-    Query -->|"Query string Q"| Orchestrator
-    
-    %% Scalability to Neural
-    KG -->|"Node text descriptions"| NE
-    GP -->|"Partition structure"| RRWP
-    
-    %% Scalability to Reasoning
-    GC -->|"Coarse graph G_coarse"| S1_Context
-    GP -->|"Partition mapping"| S2_Extract
-    
-    %% Neural to Reasoning
-    ND -->|"Node embeddings Hᵢ"| S2_Neural
-    GRIT -->|"Structural embeddings"| S2_Neural
-    GAA -->|"Attention weights α'"| S2_LLM
-    
-    %% LLM Agent connections
-    S1_LLM <-->|"Prompt / Response"| LLMAgent
-    S2_LLM <-->|"Prompt / Response"| LLMAgent
-    S3_LLM <-->|"Prompt / Response"| LLMAgent
-    
-    %% Reasoning to Output
-    S3_LLM -->|"Synthesized Answer"| Result
+### Complete Data Flow
 
-    %% ═══════════════════════════════════════════════════════════════════
-    %% STYLING
-    %% ═══════════════════════════════════════════════════════════════════
+```mermaid
+flowchart TD
+    KG(["Knowledge Graph"])
+    Q(["Query"])
     
-    classDef inputStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
-    classDef scalabilityStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-    classDef neuralStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
-    classDef reasoningStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
-    classDef outputStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
-    classDef llmStyle fill:#e0f7fa,stroke:#00838f,stroke-width:3px,color:#006064
-    classDef strategyStyle fill:#f5f5f5,stroke:#757575,stroke-width:1px,stroke-dasharray: 5 5
+    KG --> GP["Graph Partitioner"]
+    GP --> GC["Graph Coarsener"]
     
-    class KG,Query inputStyle
-    class GP,GC scalabilityStyle
-    class PS1,PS2,PS3 strategyStyle
-    class NE,ND,RRWP,GRIT,SIM,GAA neuralStyle
-    class Orchestrator,S1_Context,S1_Keywords,S1_Filter,S1_LLM,S2_Extract,S2_Neural,S2_Format,S2_LLM,S3_Aggregate,S3_Resolve,S3_LLM reasoningStyle
-    class LLMAgent llmStyle
-    class Result outputStyle
+    KG --> NE["Node Encoder"]
+    NE --> ND["Node Decoder"]
+    
+    GP --> RRWP["RRWP"]
+    RRWP --> GRIT["Graph Transformer"]
+    
+    GC --> S1["Stage 1: Coarse"]
+    Q --> S1
+    
+    S1 --> S2["Stage 2: Fine"]
+    ND --> S2
+    GRIT --> S2
+    
+    S2 --> S3["Stage 3: Synthesis"]
+    
+    S3 --> Result(["Final Answer"])
+    
+    style KG fill:#e3f2fd,stroke:#1565c0
+    style Q fill:#e3f2fd,stroke:#1565c0
+    style GP fill:#e8f5e9,stroke:#2e7d32
+    style GC fill:#e8f5e9,stroke:#2e7d32
+    style NE fill:#f3e5f5,stroke:#7b1fa2
+    style ND fill:#f3e5f5,stroke:#7b1fa2
+    style RRWP fill:#f3e5f5,stroke:#7b1fa2
+    style GRIT fill:#f3e5f5,stroke:#7b1fa2
+    style S1 fill:#fff3e0,stroke:#ef6c00
+    style S2 fill:#fff3e0,stroke:#ef6c00
+    style S3 fill:#fff3e0,stroke:#ef6c00
+    style Result fill:#fce4ec,stroke:#c2185b
 ```
 
 ---
