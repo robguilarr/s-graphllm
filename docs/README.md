@@ -18,6 +18,20 @@ Welcome to the S-GraphLLM theoretical documentation. This directory contains com
    - Divide-and-conquer paradigm
    - Applications in knowledge graph reasoning
 
+### Architecture Documentation
+
+3. **[Component Guide](component_guide.md)** ⭐ NEW
+   - Step-by-step explanation of every component
+   - Theoretical basis with paper citations
+   - Mechanism of action for each component
+   - Data flow and input/output specifications
+
+4. **[Architecture Diagram](architecture_diagram.md)** ⭐ NEW
+   - Complete Mermaid.js architecture diagram
+   - Layer-by-layer visualization
+   - Stage-by-stage sequence diagrams
+   - Implementation file mapping
+
 ## 🎯 Quick Navigation
 
 ### By Component
