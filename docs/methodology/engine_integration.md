@@ -109,7 +109,7 @@ flowchart LR
 
 #### Dimension Constraint
 
-$$\text{NodeEncoderDecoder.output\_dim} = \text{GraphTransformer.embed\_dim}$$
+$$\text{NodeEncoderDecoder.output}\_\text{dim} = \text{GraphTransformer.embed}\_\text{dim}$$
 
 The `NodeDecoder.output_projection` (line 178 in `node_encoder_decoder.py`) outputs tensors of dimension `output_dim`, and the `GraphTransformer` expects node features of dimension `embed_dim` (line 348 in `graph_transformer.py`). These **must match**.
 
@@ -126,7 +126,7 @@ $$H_i = \text{NodeDecoder}(Q,\; \text{NodeEncoder}(d_i, W_D)) \quad \xrightarrow
 
 After this handoff, the Graph Transformer refines $x^{(0)}$ through its layer stack:
 
-$$x^{(l)}_i,\; e^{(l)} = \text{GraphTransformerLayer}_l(x^{(l-1)}_i,\; \text{edge\_index},\; e^{(l-1)})$$
+$$x^{(l)}_i,\; e^{(l)} = \text{GraphTransformerLayer}_l(x^{(l-1)}_i,\; \text{edge}\_\text{index},\; e^{(l-1)})$$
 
 #### Plain English
 
@@ -412,7 +412,7 @@ The three engines communicate through tensors whose dimensions must be compatibl
 
 The **output_dim / embed_dim** row is the critical alignment point for Connection A:
 
-$$\boxed{\text{NodeEncoderDecoder.output\_dim} = \text{GraphTransformer.embed\_dim}}$$
+$$\boxed{\text{NodeEncoderDecoder.output}\_\text{dim} = \text{GraphTransformer.embed}\_\text{dim}}$$
 
 If these differ, the node embeddings from the Semantic Engine cannot be used as input to the Structural Engine without an additional projection layer.
 
@@ -420,7 +420,7 @@ If these differ, the node embeddings from the Semantic Engine cannot be used as 
 
 For the Focus Engine to modulate LLM attention, its hidden dimension must match the LLM's hidden dimension:
 
-$$\boxed{\text{GraphAwareAttention.hidden\_dim} = \text{LLM hidden dimension}}$$
+$$\boxed{\text{GraphAwareAttention.hidden}\_\text{dim} = \text{LLM hidden dimension}}$$
 
 In the current configuration, `GraphAwareAttentionConfig.hidden_dim` defaults to `768` (matching BERT-base or similar), while `Config.hidden_dim` is `1024`. These are reconciled through the `GraphAwareAttentionConfig` dataclass which allows independent configuration.
 

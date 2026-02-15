@@ -56,7 +56,7 @@ The RRWP encoding injects graph topology into every attention computation, allow
 
 For each destination node $j$, the softmax is computed over all incoming edges:
 
-$$\text{pyg\_softmax}(\text{src}_e, \text{index}_e) = \frac{\exp(\text{src}_e - \max_{e' \in \mathcal{N}(j)} \text{src}_{e'})}{\sum_{e' \in \mathcal{N}(j)} \exp(\text{src}_{e'} - \max_{e'' \in \mathcal{N}(j)} \text{src}_{e''})}$$
+$$\text{pyg}\_\text{softmax}(\text{src}_e, \text{index}_e) = \frac{\exp(\text{src}_e - \max_{e' \in \mathcal{N}(j)} \text{src}_{e'})}{\sum_{e' \in \mathcal{N}(j)} \exp(\text{src}_{e'} - \max_{e'' \in \mathcal{N}(j)} \text{src}_{e''})}$$
 
 | Symbol | Definition | Code counterpart |
 |--------|-----------|------------------|
@@ -213,7 +213,7 @@ $$\alpha_e = \text{einsum}(\text{``ehd,dhc}\to\text{ehc''}, \tilde{\text{score}}
 
 **Sparse softmax** (per destination node):
 
-$$\hat{\alpha}_e = \text{pyg\_softmax}(\text{clamp}(\alpha_e, -C, C),\; \text{dst}(e))$$
+$$\hat{\alpha}_e = \text{pyg}\_\text{softmax}(\text{clamp}(\alpha_e, -C, C),\; \text{dst}(e))$$
 
 **Message aggregation**:
 
@@ -312,7 +312,7 @@ h, e_out = attn(x, edge_index, edge_attr)
 
 For a single layer:
 
-$$x_\text{attn}, e_\text{attn} = \text{MultiHeadGraphAttention}(x, \text{edge\_index}, e)$$
+$$x_\text{attn}, e_\text{attn} = \text{MultiHeadGraphAttention}(x, \text{edge}\_\text{index}, e)$$
 
 $$x' = \text{LayerNorm}_\text{node}(x_\text{attn} + \text{FFN}_\text{node}(x_\text{attn}))$$
 
@@ -382,13 +382,13 @@ x_out, e_out = layer(x, edge_index, edge_attr)
 
 Complete forward pass:
 
-$$R = \text{compute\_rrwp\_encoding}(A, C) \quad \text{(Eq. 6)}$$
+$$R = \text{compute}\_\text{rrwp}\_\text{encoding}(A, C) \quad \text{(Eq. 6)}$$
 
-$$e^{(0)} = W_R \cdot R[\text{edge\_index}[0],\; \text{edge\_index}[1],\; :] + b_R$$
+$$e^{(0)} = W_R \cdot R[\text{edge}\_\text{index}[0],\; \text{edge}\_\text{index}[1],\; :] + b_R$$
 
 $$x^{(0)} = x$$
 
-$$\text{For } l = 1, \ldots, L: \quad x^{(l)}, e^{(l)} = \text{GraphTransformerLayer}_l(x^{(l-1)}, \text{edge\_index}, e^{(l-1)})$$
+$$\text{For } l = 1, \ldots, L: \quad x^{(l)}, e^{(l)} = \text{GraphTransformerLayer}_l(x^{(l-1)}, \text{edge}\_\text{index}, e^{(l-1)})$$
 
 $$\text{Output} = x^{(L)}$$
 
