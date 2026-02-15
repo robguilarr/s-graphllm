@@ -17,20 +17,20 @@ Within the S-GraphLLM four-layer stack (**Scalability → Neural → Reasoning �
 
 ```mermaid
 flowchart LR
-    subgraph GraphAwareAttention["Graph-Aware Attention (Focus Engine)"]
+    subgraph GraphAwareAttention["Graph-Aware Attention · Focus Engine"]
         direction TB
-        A["Adjacency Matrix"] --> B["compute_structural_similarity_matrix()"]
-        B --> C["Similarity Matrix S ∈ ℝ^(n×n)"]
+        A["Adjacency Matrix"] --> B["Compute Structural\nSimilarity Matrix"]
+        B --> C["Similarity Matrix S"]
 
-        D["Input: Q, K, V<br/>(batch × seq × hidden)"] --> E["Linear Projections<br/>W_Q, W_K, W_V"]
-        E --> F["Scaled Dot-Product<br/>QK^T / √d_k"]
-        C --> G["β · S(n_i, n_j)"]
-        F --> H["scores + β·S"]
+        D["Input: Q, K, V\n(batch, seq, hidden)"] --> E["Linear Projections\nWQ, WK, WV"]
+        E --> F["Scaled Dot-Product\nQK T / sqrt dk"]
+        C --> G["beta times S(ni, nj)"]
+        F --> H["scores + beta S"]
         G --> H
         H --> I["Softmax + Dropout"]
         I --> J["Weighted Sum with V"]
         J --> K["Output Projection"]
-        K --> L["Output<br/>(batch × seq × hidden)"]
+        K --> L["Output\n(batch, seq, hidden)"]
     end
 
     style GraphAwareAttention fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px

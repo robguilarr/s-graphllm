@@ -17,17 +17,17 @@ Within the S-GraphLLM four-layer stack (**Scalability → Neural → Reasoning �
 
 ```mermaid
 flowchart TD
-    subgraph GraphTransformer["Graph Transformer (Structural Engine)"]
-        A["Adjacency Matrix A"] --> B["compute_rrwp_encoding()"]
-        B --> C["RRWP Tensor R ∈ ℝ^(N×N×C)"]
+    subgraph GraphTransformer["Graph Transformer · Structural Engine"]
+        A["Adjacency Matrix A"] --> B["compute rrwp encoding"]
+        B --> C["RRWP Tensor R"]
         C --> D["Extract Edge Attributes"]
-        D --> E["rrwp_projection (Linear)"]
+        D --> E["rrwp projection · Linear"]
 
-        F["Node Features x ∈ ℝ^(N×d)"] --> G["GraphTransformerLayer 1"]
+        F["Node Features x"] --> G["GraphTransformerLayer 1"]
         E --> G
         G --> H["GraphTransformerLayer 2"]
-        H --> I["... (num_layers)"]
-        I --> J["Output Node Features x' ∈ ℝ^(N×d)"]
+        H --> I["... num layers"]
+        I --> J["Output Node Features x prime"]
     end
 
     subgraph GTLayer["Inside Each GraphTransformerLayer"]

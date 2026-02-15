@@ -15,18 +15,18 @@ Within the S-GraphLLM four-layer stack (**Scalability → Neural → Reasoning �
 
 ```mermaid
 flowchart LR
-    subgraph NodeEncoderDecoder["Node Encoder-Decoder (Semantic Engine)"]
+    subgraph NodeEncoderDecoder["Node Encoder-Decoder · Semantic Engine"]
         direction LR
-        A["Token Embeddings<br/>(batch × seq_len × input_dim)"] --> B["Down-Projection W_D"]
+        A["Token Embeddings\n(batch, seq len, input dim)"] --> B["Down-Projection W D"]
         B --> C["Transformer Encoder"]
         C --> D["Masked Mean Pooling"]
         D --> E["Layer Norm"]
-        E --> F["Context Vector c_i<br/>(batch × hidden_dim)"]
+        E --> F["Context Vector ci\n(batch, hidden dim)"]
         F --> G["Query Expansion Q"]
-        G --> H["Transformer Decoder<br/>(cross-attention)"]
+        G --> H["Transformer Decoder\n(cross-attention)"]
         H --> I["Output Projection"]
         I --> J["Layer Norm"]
-        J --> K["Node Representation H_i<br/>(batch × output_dim)"]
+        J --> K["Node Representation Hi\n(batch, output dim)"]
     end
 
     style NodeEncoderDecoder fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px

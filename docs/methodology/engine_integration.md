@@ -13,7 +13,7 @@ The S-GraphLLM four-layer stack is **Scalability → Neural → Reasoning → Ou
 ```mermaid
 flowchart TD
     subgraph InputLayer["Layer 1: Input"]
-        KG(["Knowledge Graph G = (V, E, X)"])
+        KG(["Knowledge Graph G"])
         Q(["Natural Language Query"])
     end
 
@@ -31,11 +31,11 @@ flowchart TD
         end
 
         subgraph StructuralEngine["Structural Engine"]
-            RRWP["compute_rrwp_encoding()"] --> GRIT["GraphTransformer"]
+            RRWP["RRWP Encoding"] --> GRIT["GraphTransformer"]
         end
 
         subgraph FocusEngine["Focus Engine"]
-            SIM["compute_structural_similarity_matrix()"] --> GAA["GraphAwareAttention"]
+            SIM["Similarity Matrix"] --> GAA["GraphAwareAttention"]
         end
     end
 
@@ -50,38 +50,24 @@ flowchart TD
         ANS(["Final Answer + Evidence"])
     end
 
-    %% Layer 1 → Layer 2
     KG --> GP
 
-    %% Layer 1 → Layer 3 (raw text feeds Semantic Engine)
-    KG -. "node text descriptions d_i" .-> NE
+    KG -. "node text descriptions" .-> NE
 
-    %% Layer 2 → Layer 3 (partitioned structure feeds both Structural and Focus)
-    GP -- "adj_matrix A per partition" --> RRWP
-    GP -- "adj_matrix A per partition" --> SIM
+    GP -- "adjacency matrix A" --> RRWP
+    GP -- "adjacency matrix A" --> SIM
 
-    %% Layer 2 → Layer 4 (coarse graph feeds Stage 1)
-    GC -- "G_coarse" --> S1
+    GC -- "coarse graph" --> S1
     Q --> S1
 
-    %% ===== INTER-ENGINE CONNECTIONS =====
-    %% Connection A: Semantic → Structural
-    ND -- "H_i ∈ ℝ^(N×output_dim) — node features x" --> GRIT
+    ND -- "Hi node features x" --> GRIT
 
-    %% Connection B: Structural → Focus (shared adj_matrix)
-    %% (Implicit: both consume the same adjacency matrix from the Scalability Layer)
+    ND -- "node embeddings Hi" --> S2
 
-    %% ===== ENGINES → REASONING =====
-    %% Connection C: Semantic → Stage 2
-    ND -- "node embeddings H_i" --> S2
+    GRIT -- "structural embeddings" --> S2
 
-    %% Connection D: Structural → Stage 2
-    GRIT -- "structural embeddings x'" --> S2
+    GAA -- "attention weights" --> S2
 
-    %% Connection E: Focus → Stage 2
-    GAA -- "attention weights α'" --> S2
-
-    %% Layer 4 → Layer 5
     S3 --> ANS
 
     style InputLayer fill:#e3f2fd,stroke:#1565c0
@@ -105,7 +91,7 @@ There are **five primary connections** between the engines and their surrounding
 
 ```mermaid
 flowchart LR
-    A["NodeEncoderDecoder.forward()"] -- "H_i ∈ ℝ^(N × output_dim)" --> B["GraphTransformer.forward(x=H_i, ...)"]
+    A["NodeEncoderDecoder.forward"] -- "Hi · N x output dim" --> B["GraphTransformer.forward · x = Hi"]
 
     style A fill:#f3e5f5,stroke:#7b1fa2
     style B fill:#f3e5f5,stroke:#7b1fa2
@@ -185,8 +171,8 @@ x_structural = graph_transformer(x=H, edge_index=edge_index, adj_matrix=adj_matr
 
 ```mermaid
 flowchart TD
-    GP["GraphPartitioner"] -- "adj_matrix A ∈ ℝ^(N×N)" --> RRWP["compute_rrwp_encoding(A)"]
-    GP -- "adj_matrix A ∈ ℝ^(N×N)" --> SIM["compute_structural_similarity_matrix(A)"]
+    GP["GraphPartitioner"] -- "adjacency matrix A · NxN" --> RRWP["RRWP Encoding"]
+    GP -- "adjacency matrix A · NxN" --> SIM["Structural Similarity Matrix"]
 
     RRWP --> GT["GraphTransformer"]
     SIM --> GAA["GraphAwareAttention"]
@@ -242,7 +228,7 @@ Both encodings are deterministic given $A$ and can be computed in parallel.
 
 ```mermaid
 flowchart LR
-    ND["NodeDecoder → H_i"] -- "node embeddings" --> S2["Stage 2: Format Detailed Context"]
+    ND["NodeDecoder · Hi"] -- "node embeddings" --> S2["Stage 2: Format Detailed Context"]
 
     style ND fill:#f3e5f5,stroke:#7b1fa2
     style S2 fill:#fff3e0,stroke:#ef6c00
@@ -278,7 +264,7 @@ H = self.node_encoder_decoder.encode_batch(node_texts, tokenizer, device=device)
 
 ```mermaid
 flowchart LR
-    GT["GraphTransformer → x'"] -- "structural embeddings" --> S2["Stage 2: Format Detailed Context"]
+    GT["GraphTransformer · x prime"] -- "structural embeddings" --> S2["Stage 2: Format Detailed Context"]
 
     style GT fill:#f3e5f5,stroke:#7b1fa2
     style S2 fill:#fff3e0,stroke:#ef6c00
@@ -314,7 +300,7 @@ x_structural = self.graph_transformer(x=H, edge_index=edge_index, adj_matrix=adj
 
 ```mermaid
 flowchart LR
-    GAA["GraphAwareAttention → α'"] -- "modulated attention weights" --> LLM["Stage 2: LLM Multi-hop Reasoning"]
+    GAA["GraphAwareAttention"] -- "modulated attention weights" --> LLM["Stage 2: LLM Multi-hop Reasoning"]
 
     style GAA fill:#f3e5f5,stroke:#7b1fa2
     style LLM fill:#fff3e0,stroke:#ef6c00
@@ -357,32 +343,32 @@ sequenceDiagram
     participant LLM as LLM Agent
 
     User->>Scal: Knowledge Graph G + Query Q
-    Scal->>Scal: Partition G → {P₁...Pₖ}
-    Scal->>Scal: Coarsen → G_coarse
+    Scal->>Scal: Partition G into P1 ... Pk
+    Scal->>Scal: Coarsen into G coarse
 
-    Scal->>Reason: G_coarse (Stage 1 input)
+    Scal->>Reason: G coarse (Stage 1 input)
     Reason->>LLM: Coarse-grained prompt
-    LLM-->>Reason: Selected partitions [Pᵢ, Pⱼ, ...]
+    LLM-->>Reason: Selected partitions
 
     Note over Sem,Focus: Neural Layer activates for selected partitions
 
-    Scal->>Sem: Node text descriptions {d₁, d₂, ...}
-    Sem->>Sem: Encode → c_i = TransformerEncoder(d_i, W_D)
-    Sem->>Sem: Decode → H_i = TransformerDecoder(Q, c_i)
+    Scal->>Sem: Node text descriptions
+    Sem->>Sem: Encode ci = TransformerEncoder(di, WD)
+    Sem->>Sem: Decode Hi = TransformerDecoder(Q, ci)
 
-    Scal->>Struct: adj_matrix A (per partition)
-    Scal->>Focus: adj_matrix A (per partition)
+    Scal->>Struct: adjacency matrix A (per partition)
+    Scal->>Focus: adjacency matrix A (per partition)
 
-    Sem->>Struct: Node embeddings H_i (Connection A)
-    Struct->>Struct: RRWP → R_ij
-    Struct->>Struct: GraphTransformer layers → x'
+    Sem->>Struct: Node embeddings Hi (Connection A)
+    Struct->>Struct: RRWP produces Rij
+    Struct->>Struct: GraphTransformer layers produce x prime
 
-    Focus->>Focus: Compute S(n_i, n_j) from A
-    Focus->>Focus: Prepare β · S bias matrix
+    Focus->>Focus: Compute S(ni, nj) from A
+    Focus->>Focus: Prepare beta times S bias matrix
 
-    Sem->>Reason: H_i embeddings (Connection C)
-    Struct->>Reason: x' structural embeddings (Connection D)
-    Focus->>Reason: α' attention weights (Connection E)
+    Sem->>Reason: Hi embeddings (Connection C)
+    Struct->>Reason: x prime structural embeddings (Connection D)
+    Focus->>Reason: Attention weights (Connection E)
 
     Reason->>LLM: Fine-grained prompt + embeddings
     LLM-->>Reason: Multi-hop reasoning result
